@@ -22,5 +22,6 @@ export const GlobalStyle = createGlobalStyle`
     font-weight: 400;
     font-size: 1rem;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
 `
