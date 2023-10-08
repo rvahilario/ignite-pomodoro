@@ -1,9 +1,21 @@
 import styled from 'styled-components'
 import { Play } from '@phosphor-icons/react'
 
-type Props = {}
+const OPTION_LIST_MOCK = [
+  'Web Development Project',
+  'Task Management App',
+  'Corporate Website Redesign',
+  'Book Writing Project',
+  'Language Learning App',
+  'Scientific Research Project',
+  'Financial Management App',
+  'Digital Marketing Project',
+  'Fitness Training App',
+]
 
-export function Home({}: Props) {
+type HomeProps = {}
+
+export function Home({}: HomeProps) {
   return (
     <FormContainer>
       <InputDiv>
@@ -12,10 +24,24 @@ export function Home({}: Props) {
           id="task-name"
           type="text"
           placeholder="Give a name to your project"
+          list="task-suggestions"
         />
+        <datalist id="task-suggestions">
+          {OPTION_LIST_MOCK.map((option) => (
+            <option key={option} value={option} />
+          ))}
+        </datalist>
 
         <label htmlFor="minutesAmount">for</label>
-        <input id="minutesAmount" className="minutes-amount" type="number" />
+        <input
+          id="minutesAmount"
+          className="minutes-amount"
+          type="number"
+          placeholder="00"
+          step={5}
+          min={5}
+          max={60}
+        />
 
         <span>minutes.</span>
       </InputDiv>
@@ -28,10 +54,10 @@ export function Home({}: Props) {
         <span>0</span>
       </TimerDiv>
 
-      <button type="submit">
+      <StyledButton type="submit" disabled={true}>
         <Play size="1.5rem" />
         Start
-      </button>
+      </StyledButton>
     </FormContainer>
   )
 }
@@ -47,7 +73,7 @@ const InputDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 4.625rem auto 0;
+  margin-top: 4.625rem;
 
   color: ${({ theme }) => theme['gray-100']};
   font-size: 1.125rem;
@@ -56,18 +82,29 @@ const InputDiv = styled.div`
   gap: 0.5rem;
 
   input {
-    padding: 0.5rem;
+    flex: 1;
+    padding: 0 0.5rem;
     background: transparent;
     border: none;
     border-bottom: 2px solid ${({ theme }) => theme['gray-500']};
     color: ${({ theme }) => theme['gray-100']};
 
+    &::placeholder {
+      color: ${({ theme }) => theme['gray-500']};
+    }
+
     &:focus {
-      border-bottom: 2px solid ${({ theme }) => theme['gray-100']};
+      box-shadow: none;
+      border-bottom: 2px solid ${({ theme }) => theme['green-500']};
+    }
+
+    &::-webkit-calendar-picker-indicator {
+      display: none !important;
     }
   }
 
   .minutes-amount {
+    flex: 0;
     width: 4.625rem;
   }
 `
@@ -94,5 +131,28 @@ const TimerDiv = styled.div`
     margin: auto -13px;
     background: none;
     color: ${({ theme }) => theme['green-500']};
+  }
+`
+
+const StyledButton = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 0.5rem;
+  color: ${({ theme }) => theme['gray-100']};
+  background: ${({ theme }) => theme['green-500']};
+
+  height: 4rem;
+  padding: 1rem 2.5rem;
+  gap: 0.5rem;
+
+  &:hover:not(:disabled) {
+    background: ${({ theme }) => theme['green-700']};
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 `
