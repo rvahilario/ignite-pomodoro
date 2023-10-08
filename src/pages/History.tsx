@@ -23,7 +23,25 @@ export function History({}: HistoryProps) {
               <td>task name</td>
               <td>25 minutes</td>
               <td>2 months ago</td>
-              <td>Completed</td>
+              <td>
+                <Status status={'completed'} />
+              </td>
+            </tr>
+            <tr>
+              <td>task name</td>
+              <td>25 minutes</td>
+              <td>2 months ago</td>
+              <td>
+                <Status status={'in_progress'} />
+              </td>
+            </tr>
+            <tr>
+              <td>task name</td>
+              <td>25 minutes</td>
+              <td>2 months ago</td>
+              <td>
+                <Status status={'interrupted'} />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -90,5 +108,39 @@ const HistoryList = styled.div`
         padding-right: 1.5rem;
       }
     }
+  }
+`
+
+const STATUS_TEXT = {
+  completed: 'Completed',
+  interrupted: 'Interrupted',
+  in_progress: 'In progress',
+}
+
+const STATUS_COLOR = {
+  completed: 'green-500',
+  interrupted: 'red-500',
+  in_progress: 'yellow-500',
+} as const
+
+interface StatusProps {
+  status: keyof typeof STATUS_COLOR
+}
+
+const Status = styled.span<StatusProps>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: ${({ theme, status }) => theme[STATUS_COLOR[status]]};
+  }
+
+  &::after {
+    content: ${({ status }) => `"${STATUS_TEXT[status]}"`};
   }
 `
