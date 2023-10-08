@@ -1,5 +1,8 @@
 import styled from 'styled-components'
 import { Play } from '@phosphor-icons/react'
+import { useForm } from 'react-hook-form'
+import * as zod from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 const OPTION_LIST_MOCK = [
   'Web Development Project',
@@ -13,11 +16,37 @@ const OPTION_LIST_MOCK = [
   'Fitness Training App',
 ]
 
+const DEFAULT_TASK_FORM_DATA = {
+  taskName: '',
+  minutesAmount: 0,
+}
+
+const taskFormValidationSchema = zod.object({
+  taskName: zod.string().min(1, 'Fill in the task name.'),
+  minutesAmount: zod.number().min(5).max(60),
+})
+
+type TaskFormData = zod.infer<typeof taskFormValidationSchema>
+
 type HomeProps = {}
 
 export function Home({}: HomeProps) {
+  const { register, handleSubmit, watch, reset } = useForm<TaskFormData>({
+    resolver: zodResolver(taskFormValidationSchema),
+    defaultValues: DEFAULT_TASK_FORM_DATA,
+  })
+
+  const taskName = watch('taskName')
+  const taskTimer = watch('minutesAmount')
+  const isSubmitDisabled = !taskName || !taskTimer
+
+  function handleCreateTaskCycle(formData: TaskFormData) {
+    console.log('formData', formData)
+    reset()
+  }
+
   return (
-    <FormContainer>
+    <FormContainer onSubmit={handleSubmit(handleCreateTaskCycle)}>
       <InputDiv>
         <label htmlFor="task-name">I'm going to work on</label>
         <input
@@ -25,6 +54,7 @@ export function Home({}: HomeProps) {
           type="text"
           placeholder="Give a name to your project"
           list="task-suggestions"
+          {...register('taskName')}
         />
         <datalist id="task-suggestions">
           {OPTION_LIST_MOCK.map((option) => (
@@ -39,8 +69,9 @@ export function Home({}: HomeProps) {
           type="number"
           placeholder="00"
           step={5}
-          min={5}
-          max={60}
+          {...register('minutesAmount', {
+            valueAsNumber: true,
+          })}
         />
 
         <span>minutes.</span>
@@ -54,7 +85,7 @@ export function Home({}: HomeProps) {
         <span>0</span>
       </TimerDiv>
 
-      <StyledButton type="submit" disabled={true}>
+      <StyledButton type="submit" disabled={isSubmitDisabled}>
         <Play size="1.5rem" />
         Start
       </StyledButton>
