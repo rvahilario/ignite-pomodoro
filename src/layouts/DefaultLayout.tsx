@@ -17,7 +17,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   height: calc(100vh - 10rem);
-  width: 70rem;
+  max-width: 70rem;
   margin: 5rem auto;
   padding: 0 2.5rem 2.5rem;
   background: ${({ theme }) => theme['gray-800']};
