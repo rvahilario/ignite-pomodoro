@@ -3,7 +3,8 @@ import { Play } from '@phosphor-icons/react'
 import { useForm } from 'react-hook-form'
 import * as zod from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { differenceInSeconds } from 'date-fns'
 
 const OPTION_LIST_MOCK = [
   'Web Development Project',
@@ -33,6 +34,7 @@ interface CycleType {
   id: string
   taskName: string
   minutesAmount: number
+  startDate: Date
 }
 
 type HomeProps = {}
@@ -40,6 +42,8 @@ type HomeProps = {}
 export function Home({}: HomeProps) {
   const [cyclesList, setCyclesList] = useState<CycleType[]>([])
   const [activeCycleId, setActiveCycleId] = useState('')
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+
   const { register, handleSubmit, watch, reset } = useForm<CycleFormData>({
     resolver: zodResolver(taskFormValidationSchema),
     defaultValues: DEFAULT_TASK_FORM_DATA,
@@ -54,14 +58,44 @@ export function Home({}: HomeProps) {
       id: String(new Date().getTime()),
       taskName: formData.taskName,
       minutesAmount: formData.minutesAmount,
+      startDate: new Date(),
     }
 
     setCyclesList((prevState) => [...prevState, newCycle])
     setActiveCycleId(newCycle.id)
+    setAmountSecondsPassed(0)
     reset()
   }
 
   const activeCycle = cyclesList.find((cycle) => cycle.id === activeCycleId)
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+  const minutesAmount = Math.floor(currentSeconds / 60)
+  const secondsAmount = currentSeconds % 60
+  const minutesString = String(minutesAmount).padStart(2, '0')
+  const secondsString = String(secondsAmount).padStart(2, '0')
+
+  useEffect(() => {
+    let interval: number
+
+    if (activeCycle) {
+      interval = setInterval(() => {
+        setAmountSecondsPassed(
+          differenceInSeconds(new Date(), activeCycle.startDate)
+        )
+      }, 1000)
+    }
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [activeCycle])
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutesString}:${secondsString} - ${activeCycle.taskName}`
+    }
+  }, [minutesString, secondsString, activeCycle])
 
   return (
     <FormContainer onSubmit={handleSubmit(handleCreateTaskCycle)}>
@@ -96,11 +130,11 @@ export function Home({}: HomeProps) {
       </InputDiv>
 
       <TimerDiv>
-        <span>0</span>
-        <span>0</span>
+        <span>{minutesString[0]}</span>
+        <span>{minutesString[1]}</span>
         <span className="not-a-number">:</span>
-        <span>0</span>
-        <span>0</span>
+        <span>{secondsString[0]}</span>
+        <span>{secondsString[1]}</span>
       </TimerDiv>
 
       <StyledButton type="submit" disabled={isSubmitDisabled}>
