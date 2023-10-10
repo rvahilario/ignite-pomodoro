@@ -3,6 +3,7 @@ import { Play } from '@phosphor-icons/react'
 import { useForm } from 'react-hook-form'
 import * as zod from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 
 const OPTION_LIST_MOCK = [
   'Web Development Project',
@@ -26,12 +27,20 @@ const taskFormValidationSchema = zod.object({
   minutesAmount: zod.number().min(5).max(60),
 })
 
-type TaskFormData = zod.infer<typeof taskFormValidationSchema>
+type CycleFormData = zod.infer<typeof taskFormValidationSchema>
+
+interface CycleType {
+  id: string
+  taskName: string
+  minutesAmount: number
+}
 
 type HomeProps = {}
 
 export function Home({}: HomeProps) {
-  const { register, handleSubmit, watch, reset } = useForm<TaskFormData>({
+  const [cyclesList, setCyclesList] = useState<CycleType[]>([])
+  const [activeCycleId, setActiveCycleId] = useState('')
+  const { register, handleSubmit, watch, reset } = useForm<CycleFormData>({
     resolver: zodResolver(taskFormValidationSchema),
     defaultValues: DEFAULT_TASK_FORM_DATA,
   })
@@ -40,10 +49,19 @@ export function Home({}: HomeProps) {
   const taskTimer = watch('minutesAmount')
   const isSubmitDisabled = !taskName || !taskTimer
 
-  function handleCreateTaskCycle(formData: TaskFormData) {
-    console.log('formData', formData)
+  function handleCreateTaskCycle(formData: CycleFormData) {
+    const newCycle = {
+      id: String(new Date().getTime()),
+      taskName: formData.taskName,
+      minutesAmount: formData.minutesAmount,
+    }
+
+    setCyclesList((prevState) => [...prevState, newCycle])
+    setActiveCycleId(newCycle.id)
     reset()
   }
+
+  const activeCycle = cyclesList.find((cycle) => cycle.id === activeCycleId)
 
   return (
     <FormContainer onSubmit={handleSubmit(handleCreateTaskCycle)}>
