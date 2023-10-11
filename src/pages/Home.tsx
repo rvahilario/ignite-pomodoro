@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Play } from '@phosphor-icons/react'
+import { HandPalm, Play } from '@phosphor-icons/react'
 import { useForm } from 'react-hook-form'
 import * as zod from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -25,7 +25,7 @@ const DEFAULT_TASK_FORM_DATA = {
 
 const taskFormValidationSchema = zod.object({
   taskName: zod.string().min(1, 'Fill in the task name.'),
-  minutesAmount: zod.number().min(5).max(60),
+  minutesAmount: zod.number().min(1).max(60),
 })
 
 type CycleFormData = zod.infer<typeof taskFormValidationSchema>
@@ -35,6 +35,8 @@ interface CycleType {
   taskName: string
   minutesAmount: number
   startDate: Date
+  stopDate?: Date
+  finishDate?: Date
 }
 
 type HomeProps = {}
@@ -53,6 +55,54 @@ export function Home({}: HomeProps) {
   const taskTimer = watch('minutesAmount')
   const isSubmitDisabled = !taskName || !taskTimer
 
+  const activeCycle = cyclesList.find((cycle) => cycle.id === activeCycleId)
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+  const minutesAmount = Math.floor(currentSeconds / 60)
+  const secondsAmount = currentSeconds % 60
+  const minutesString = String(minutesAmount).padStart(2, '0')
+  const secondsString = String(secondsAmount).padStart(2, '0')
+
+  useEffect(() => {
+    let interval: number
+
+    if (activeCycle) {
+      interval = setInterval(() => {
+        const diffInSeconds = differenceInSeconds(
+          new Date(),
+          activeCycle.startDate
+        )
+
+        if (diffInSeconds < totalSeconds) {
+          setAmountSecondsPassed(diffInSeconds)
+        } else {
+          setCyclesList((prevCyclesList) =>
+            prevCyclesList.map((cycle) =>
+              cycle.id === activeCycleId
+                ? { ...cycle, finishDate: new Date() }
+                : cycle
+            )
+          )
+          setAmountSecondsPassed(totalSeconds)
+          clearInterval(interval)
+          setActiveCycleId('')
+        }
+      }, 1000)
+    }
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [activeCycle, activeCycleId, totalSeconds])
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutesString}:${secondsString} - ${activeCycle.taskName}`
+    } else {
+      document.title = 'Pomodoro Timer'
+    }
+  }, [minutesString, secondsString, activeCycle])
+
   function handleCreateTaskCycle(formData: CycleFormData) {
     const newCycle = {
       id: String(new Date().getTime()),
@@ -67,35 +117,14 @@ export function Home({}: HomeProps) {
     reset()
   }
 
-  const activeCycle = cyclesList.find((cycle) => cycle.id === activeCycleId)
-  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
-  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
-  const minutesAmount = Math.floor(currentSeconds / 60)
-  const secondsAmount = currentSeconds % 60
-  const minutesString = String(minutesAmount).padStart(2, '0')
-  const secondsString = String(secondsAmount).padStart(2, '0')
-
-  useEffect(() => {
-    let interval: number
-
-    if (activeCycle) {
-      interval = setInterval(() => {
-        setAmountSecondsPassed(
-          differenceInSeconds(new Date(), activeCycle.startDate)
-        )
-      }, 1000)
-    }
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [activeCycle])
-
-  useEffect(() => {
-    if (activeCycle) {
-      document.title = `${minutesString}:${secondsString} - ${activeCycle.taskName}`
-    }
-  }, [minutesString, secondsString, activeCycle])
+  function handleInterruptTaskCycle() {
+    setCyclesList((prevCyclesList) =>
+      prevCyclesList.map((cycle) =>
+        cycle.id === activeCycleId ? { ...cycle, stopDate: new Date() } : cycle
+      )
+    )
+    setActiveCycleId('')
+  }
 
   return (
     <FormContainer onSubmit={handleSubmit(handleCreateTaskCycle)}>
@@ -137,10 +166,20 @@ export function Home({}: HomeProps) {
         <span>{secondsString[1]}</span>
       </TimerDiv>
 
-      <StyledButton type="submit" disabled={isSubmitDisabled}>
-        <Play size="1.5rem" />
-        Start
-      </StyledButton>
+      {activeCycle ? (
+        <StyledButton
+          className="stop-button"
+          onClick={handleInterruptTaskCycle}
+        >
+          <HandPalm size="1.5rem" />
+          Stop
+        </StyledButton>
+      ) : (
+        <StyledButton type="submit" disabled={isSubmitDisabled}>
+          <Play size="1.5rem" />
+          Start
+        </StyledButton>
+      )}
     </FormContainer>
   )
 }
@@ -230,8 +269,15 @@ const StyledButton = styled.button`
   padding: 1rem 2.5rem;
   gap: 0.5rem;
 
+  &.stop-button {
+    background: ${({ theme }) => theme['red-500']};
+  }
+
   &:hover:not(:disabled) {
     background: ${({ theme }) => theme['green-700']};
+    &.stop-button {
+      background: ${({ theme }) => theme['red-700']};
+    }
   }
 
   &:disabled {
