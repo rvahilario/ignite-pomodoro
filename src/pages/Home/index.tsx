@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { useContext } from 'react'
 import styled from 'styled-components'
 import { FormProvider, useForm } from 'react-hook-form'
 import * as zod from 'zod'
@@ -18,23 +18,28 @@ const taskFormValidationSchema = zod.object({
   minutesAmount: zod.number().min(1).max(60),
 })
 
-type CycleFormData = zod.infer<typeof taskFormValidationSchema>
+type NewCycleFormData = zod.infer<typeof taskFormValidationSchema>
 
 export function Home() {
-  const { activeCycle, createTaskCycle, interruptTaskCycle } =
+  const { activeCycle, createNewCycle, interruptTaskCycle } =
     useContext(CyclesContext)
-  const newCycleForm = useForm<CycleFormData>({
+  const newCycleForm = useForm<NewCycleFormData>({
     resolver: zodResolver(taskFormValidationSchema),
     defaultValues: DEFAULT_TASK_FORM_DATA,
   })
   const { handleSubmit, watch, reset } = newCycleForm
+
+  function handleCreateNewCycle(data: NewCycleFormData) {
+    createNewCycle(data)
+    reset()
+  }
 
   const taskName = watch('taskName')
   const taskTimer = watch('minutesAmount')
   const isSubmitDisabled = !taskName || !taskTimer
 
   return (
-    <FormContainer onSubmit={handleSubmit(createTaskCycle)}>
+    <FormContainer onSubmit={handleSubmit(handleCreateNewCycle)}>
       <FormProvider {...newCycleForm}>
         <NewCycleForm />
       </FormProvider>

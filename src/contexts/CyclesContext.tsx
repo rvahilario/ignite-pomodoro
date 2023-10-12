@@ -5,7 +5,7 @@ interface CyclesContextType {
   activeCycleId: string
   amountSecondsPassed: number
   cyclesList: CycleType[]
-  createTaskCycle: (formData: NewCycleFormData) => void
+  createNewCycle: (formData: NewCycleFormData) => void
   interruptTaskCycle: () => void
   markActiveCycleAsFinished: () => void
   setTotalSecondsPassed: (seconds: number) => void
@@ -53,7 +53,7 @@ export function CyclesContextProvider({ children }: CyclesProviderProps) {
     setAmountSecondsPassed(seconds)
   }
 
-  function createTaskCycle(formData: NewCycleFormData) {
+  function createNewCycle(formData: NewCycleFormData) {
     const newCycle = {
       id: String(new Date().getTime()),
       taskName: formData.taskName,
@@ -64,7 +64,6 @@ export function CyclesContextProvider({ children }: CyclesProviderProps) {
     setCyclesList((prevState) => [...prevState, newCycle])
     setActiveCycleId(newCycle.id)
     setAmountSecondsPassed(0)
-    // reset()
   }
 
   function interruptTaskCycle() {
@@ -83,7 +82,7 @@ export function CyclesContextProvider({ children }: CyclesProviderProps) {
         activeCycleId,
         amountSecondsPassed,
         cyclesList,
-        createTaskCycle,
+        createNewCycle,
         interruptTaskCycle,
         markActiveCycleAsFinished,
         setTotalSecondsPassed,
