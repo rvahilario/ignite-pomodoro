@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import styled from 'styled-components'
 import { useFormContext } from 'react-hook-form'
-import { CyclesContext } from '..'
+import { CyclesContext } from '../../../contexts/CyclesContext'
 
 const OPTION_LIST_MOCK = [
   'Web Development Project',
