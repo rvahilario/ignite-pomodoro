@@ -1,11 +1,22 @@
 import { useContext } from 'react'
 import styled from 'styled-components'
 import { CyclesContext } from '../contexts/CyclesContext'
+import { formatDistanceToNow } from 'date-fns'
 
 type HistoryProps = {}
 
 export function History({}: HistoryProps) {
   const { cyclesList } = useContext(CyclesContext)
+
+  function getCycleStatus(cycle: CycleType) {
+    if (cycle.finishDate) {
+      return 'completed'
+    } else if (cycle.stopDate) {
+      return 'interrupted'
+    } else {
+      return 'in_progress'
+    }
+  }
 
   return (
     <HistoryContainer>
@@ -26,29 +37,15 @@ export function History({}: HistoryProps) {
             {cyclesList.map((cycle) => (
               <tr key={cycle.id}>
                 <td>{cycle.taskName}</td>
-                <td>{`${cycle.minutesAmount} minutes`}</td>
-                <td>2 months ago</td>
+                <td>{cycle.minutesAmount} minutes</td>
                 <td>
-                  <Status status={'completed'} />
+                  {formatDistanceToNow(cycle.startDate, { addSuffix: true })}
+                </td>
+                <td>
+                  <Status status={getCycleStatus(cycle)} />
                 </td>
               </tr>
             ))}
-            <tr>
-              <td>task name</td>
-              <td>25 minutes</td>
-              <td>2 months ago</td>
-              <td>
-                <Status status={'in_progress'} />
-              </td>
-            </tr>
-            <tr>
-              <td>task name</td>
-              <td>25 minutes</td>
-              <td>2 months ago</td>
-              <td>
-                <Status status={'interrupted'} />
-              </td>
-            </tr>
           </tbody>
         </table>
       </HistoryList>

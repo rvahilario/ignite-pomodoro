@@ -13,15 +13,6 @@ interface CyclesContextType {
 
 export const CyclesContext = createContext({} as CyclesContextType)
 
-interface CycleType {
-  id: string
-  taskName: string
-  minutesAmount: number
-  startDate: Date
-  stopDate?: Date
-  finishDate?: Date
-}
-
 interface NewCycleFormData {
   taskName: string
   minutesAmount: number
