@@ -1,4 +1,10 @@
-import { ReactNode, createContext, useReducer, useState } from 'react'
+import {
+  ReactNode,
+  createContext,
+  useEffect,
+  useReducer,
+  useState,
+} from 'react'
 import { cyclesReducer } from '../reducers/cycles/reducer'
 import {
   addNewCycleAction,
@@ -8,7 +14,7 @@ import {
 
 interface CyclesContextType {
   activeCycle: CycleType | undefined
-  activeCycleId: string
+  activeCycleId: string | undefined
   amountSecondsPassed: number
   cyclesList: CycleType[]
   createNewCycle: (formData: NewCycleFormData) => void
@@ -29,13 +35,33 @@ interface CyclesProviderProps {
 }
 
 export function CyclesContextProvider({ children }: CyclesProviderProps) {
-  const [cyclesState, dispatch] = useReducer(cyclesReducer, {
-    cyclesList: [],
-    activeCycleId: '',
-  })
-  const { cyclesList, activeCycleId } = cyclesState
+  const [cyclesState, dispatch] = useReducer(
+    cyclesReducer,
+    {
+      cyclesList: [],
+      activeCycleId: '',
+    },
+    (initialState) => {
+      const storedStateAsJSON = localStorage.getItem(
+        '@ignite-pomodoro:cyclesState-1.0.0'
+      )
+
+      if (!storedStateAsJSON) {
+        return initialState
+      }
+
+      return JSON.parse(storedStateAsJSON)
+    }
+  )
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
 
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+
+    localStorage.setItem('@ignite-pomodoro:cyclesState-1.0.0', stateJSON)
+  }, [cyclesState])
+
+  const { cyclesList, activeCycleId } = cyclesState
   const activeCycle = cyclesList.find((cycle) => cycle.id === activeCycleId)
 
   function createNewCycle(formData: NewCycleFormData) {

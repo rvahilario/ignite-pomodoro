@@ -4,20 +4,33 @@ export enum CyclesActionTypes {
   INTERRUPT_ACTIVE_CYCLE = 'INTERRUPT_ACTIVE_CYCLE',
 }
 
-export function addNewCycleAction(newCycle: CycleType) {
+export interface AddNewCycleAction {
+  type: CyclesActionTypes.ADD_NEW_CYCLE
+  payload: { newCycle: CycleType }
+}
+
+export function addNewCycleAction(newCycle: CycleType): AddNewCycleAction {
   return {
     type: CyclesActionTypes.ADD_NEW_CYCLE,
     payload: { newCycle },
   }
 }
 
-export function markActiveCycleAsFinishedAction() {
+export interface MarkActiveCycleAsFinishedAction {
+  type: CyclesActionTypes.MARK_ACTIVE_CYCLE_AS_FINISHED
+}
+
+export function markActiveCycleAsFinishedAction(): MarkActiveCycleAsFinishedAction {
   return {
     type: CyclesActionTypes.MARK_ACTIVE_CYCLE_AS_FINISHED,
   }
 }
 
-export function interruptActiveCycleAction() {
+export interface InterruptActiveCycleAction {
+  type: CyclesActionTypes.INTERRUPT_ACTIVE_CYCLE
+}
+
+export function interruptActiveCycleAction(): InterruptActiveCycleAction {
   return {
     type: CyclesActionTypes.INTERRUPT_ACTIVE_CYCLE,
   }

@@ -1,11 +1,29 @@
-import { CyclesActionTypes } from './actions'
+import {
+  AddNewCycleAction,
+  CyclesActionTypes,
+  InterruptActiveCycleAction,
+  MarkActiveCycleAsFinishedAction,
+} from './actions'
 
 interface CyclesState {
   cyclesList: CycleType[]
   activeCycleId: string | undefined
 }
 
-export function cyclesReducer(state: CyclesState, action: any) {
+const initialState: CyclesState = {
+  cyclesList: [],
+  activeCycleId: '',
+}
+
+type ActionTypes =
+  | AddNewCycleAction
+  | MarkActiveCycleAsFinishedAction
+  | InterruptActiveCycleAction
+
+export function cyclesReducer(
+  state = initialState,
+  action: ActionTypes
+): CyclesState {
   switch (action.type) {
     default:
       return state
@@ -14,7 +32,7 @@ export function cyclesReducer(state: CyclesState, action: any) {
       return {
         ...state,
         cyclesList: [...state.cyclesList, action.payload.newCycle],
-        activeCycleId: action.payload.newCycle.id,
+        activeCycleId: action.payload.newCycle?.id,
       }
 
     case CyclesActionTypes.MARK_ACTIVE_CYCLE_AS_FINISHED:
