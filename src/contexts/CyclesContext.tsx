@@ -1,5 +1,10 @@
 import { ReactNode, createContext, useReducer, useState } from 'react'
-import { cyclesReducer } from '../reducers/cycles'
+import { cyclesReducer } from '../reducers/cycles/reducer'
+import {
+  addNewCycleAction,
+  interruptActiveCycleAction,
+  markActiveCycleAsFinishedAction,
+} from '../reducers/cycles/actions'
 
 interface CyclesContextType {
   activeCycle: CycleType | undefined
@@ -33,17 +38,6 @@ export function CyclesContextProvider({ children }: CyclesProviderProps) {
 
   const activeCycle = cyclesList.find((cycle) => cycle.id === activeCycleId)
 
-  function markActiveCycleAsFinished() {
-    dispatch({
-      type: 'MARK_ACTIVE_CYCLE_AS_FINISHED',
-      payload: { activeCycleId },
-    })
-  }
-
-  function setTotalSecondsPassed(seconds: number) {
-    setAmountSecondsPassed(seconds)
-  }
-
   function createNewCycle(formData: NewCycleFormData) {
     const newCycle = {
       id: String(new Date().getTime()),
@@ -52,18 +46,20 @@ export function CyclesContextProvider({ children }: CyclesProviderProps) {
       startDate: new Date(),
     }
 
-    dispatch({
-      type: 'ADD_NEW_CYCLE',
-      payload: { newCycle },
-    })
+    dispatch(addNewCycleAction(newCycle))
     setAmountSecondsPassed(0)
   }
 
+  function setTotalSecondsPassed(seconds: number) {
+    setAmountSecondsPassed(seconds)
+  }
+
+  function markActiveCycleAsFinished() {
+    dispatch(markActiveCycleAsFinishedAction())
+  }
+
   function interruptActiveCycle() {
-    dispatch({
-      type: 'INTERRUPT_ACTIVE_CYCLE',
-      payload: { activeCycleId },
-    })
+    dispatch(interruptActiveCycleAction())
   }
 
   return (

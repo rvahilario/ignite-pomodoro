@@ -1,3 +1,5 @@
+import { CyclesActionTypes } from './actions'
+
 interface CyclesState {
   cyclesList: CycleType[]
   activeCycleId: string | undefined
@@ -8,14 +10,14 @@ export function cyclesReducer(state: CyclesState, action: any) {
     default:
       return state
 
-    case 'ADD_NEW_CYCLE':
+    case CyclesActionTypes.ADD_NEW_CYCLE:
       return {
         ...state,
         cyclesList: [...state.cyclesList, action.payload.newCycle],
         activeCycleId: action.payload.newCycle.id,
       }
 
-    case 'MARK_ACTIVE_CYCLE_AS_FINISHED':
+    case CyclesActionTypes.MARK_ACTIVE_CYCLE_AS_FINISHED:
       return {
         ...state,
         cyclesList: state.cyclesList.map((cycle) =>
@@ -26,7 +28,7 @@ export function cyclesReducer(state: CyclesState, action: any) {
         activeCycleId: '',
       }
 
-    case 'INTERRUPT_ACTIVE_CYCLE':
+    case CyclesActionTypes.INTERRUPT_ACTIVE_CYCLE:
       return {
         ...state,
         cyclesList: state.cyclesList.map((cycle) =>
