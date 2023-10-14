@@ -11,6 +11,7 @@ import {
   interruptActiveCycleAction,
   markActiveCycleAsFinishedAction,
 } from '../reducers/cycles/actions'
+import { differenceInSeconds } from 'date-fns'
 
 interface CyclesContextType {
   activeCycle: CycleType | undefined
@@ -53,16 +54,22 @@ export function CyclesContextProvider({ children }: CyclesProviderProps) {
       return JSON.parse(storedStateAsJSON)
     }
   )
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+  const { cyclesList, activeCycleId } = cyclesState
+  const activeCycle = cyclesList.find((cycle) => cycle.id === activeCycleId)
+
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(() => {
+    if (activeCycle) {
+      return differenceInSeconds(new Date(), new Date(activeCycle.startDate))
+    }
+
+    return 0
+  })
 
   useEffect(() => {
     const stateJSON = JSON.stringify(cyclesState)
 
     localStorage.setItem('@ignite-pomodoro:cyclesState-1.0.0', stateJSON)
   }, [cyclesState])
-
-  const { cyclesList, activeCycleId } = cyclesState
-  const activeCycle = cyclesList.find((cycle) => cycle.id === activeCycleId)
 
   function createNewCycle(formData: NewCycleFormData) {
     const newCycle = {
